@@ -18,6 +18,9 @@ class WhackADroidLogic extends GameLogic
 		this.all_droids = droids;
 	}
 	
+	/***
+	 * Tell all droids to stop receiving input events
+	 */
 	public void pause()
 	{
 		for (Droid droid : this.all_droids) 
@@ -26,14 +29,21 @@ class WhackADroidLogic extends GameLogic
 		}
 	}
 	
+	/**
+	 * Tell all droids to resume receiving input events
+	 */
 	public void resume()
 	{
+	    
 		for (Droid droid : this.all_droids) 
 		{
 			droid.resume();
 		}
 	}
 	
+	/**
+	 * Reset the game. Set defaults for all droids, reset tick rate
+	 */
 	public void reset()
 	{
 		for (Droid droid : this.all_droids) 
@@ -45,11 +55,17 @@ class WhackADroidLogic extends GameLogic
 		this.tick_rate = DEFAULT_TICK_RATE;
 	}
 	
+	/***
+	 * Run game. Should be repeatedly called by the game scheduler at this.tick_rate ms
+	 */
 	public void runLogic() 
 	{
 		boolean popped = false;
 		int attempts = 0;
 		
+		//Choose a random droid and tell it to become angry. Since angry droids
+		// are not tracked separately, we'll try up to 8 times to find a non-angry
+		// droid
 		while(attempts++ < 8 && !popped)
 		{
 			int index =  (int)Math.floor(Math.random() * 16);
