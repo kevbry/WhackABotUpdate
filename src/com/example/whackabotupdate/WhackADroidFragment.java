@@ -19,7 +19,10 @@ public class WhackADroidFragment extends Fragment implements GameContext, HighSc
 	public static final String SCORE_FORMAT="Score: %d";
 	
 	private boolean is_paused=true;
+	
+	//tickHandler is used to schedule updates to the game logic
 	private Handler tickHandler;
+	//Called at intervals by the tick handler to update game logic
 	private GameLogic game_logic;
 	private HighScoreDialog high_score_dialog;
 	
@@ -37,14 +40,17 @@ public class WhackADroidFragment extends Fragment implements GameContext, HighSc
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
-	    this.tickHandler = new Handler(); //Because Handler is created in the UI thread its runnables will run in the UI thread
+	    //Because Handler is created in the UI thread its runnables will run async in the UI thread
+	    this.tickHandler = new Handler(); 
 
+	    //Gather views
 	    View rootView = inflater.inflate(R.layout.fragment_whack_abot, container,false);
 	    
 	    this.score = (TextView)rootView.findViewById(R.id.score);
         this.pause_button = (Button)rootView.findViewById(R.id.pause_game);
         this.score_button = (Button)rootView.findViewById(R.id.submit_score);
         
+        //Set up game logic
         this.game_logic = new WhackADroidLogic(this.getDroidList(rootView), this);
         
         this.high_score_dialog = HighScoreDialog.newInstance(this.game_logic.getCurrentScore(), this);
@@ -68,6 +74,9 @@ public class WhackADroidFragment extends Fragment implements GameContext, HighSc
 	
 	private ArrayList<Droid> getDroidList(View rootView)
 	{
+	    //Create droid instances for each ImageButton on screen. Each droid contains a
+	    //reference to the imageview which represents it; this can cause problems on rotation where
+	    //the imageviews are destroyed, so we just disable rotation for now.
 		ArrayList<Droid> droids = new ArrayList<Droid>();
 		
 		droids.add(new Droid((ImageButton)rootView.findViewById(R.id.robot1)));
@@ -103,17 +112,23 @@ public class WhackADroidFragment extends Fragment implements GameContext, HighSc
 		}
 	}
 	 
+	/**
+	 * Pause the game. Set state attributes, stop callbacks to the game logic
+	 */
 	private void pauseGame()
 	{
 		this.is_paused = true;
 		
 		this.pause_button.setText(R.string.resume);
-		
+		//tickHandler is used to schedule the next update of the game logic. 
 		this.tickHandler.removeCallbacks(this.game_logic);
 		
 		this.game_logic.pause();
 	}
 	
+	/**
+	 * Resume the game. Update state attributes, restart game loop updates
+	 */
 	private void resumeGame()
 	{
 		this.is_paused = false;
@@ -127,6 +142,9 @@ public class WhackADroidFragment extends Fragment implements GameContext, HighSc
 		this.tickHandler.postDelayed(this.game_logic, this.game_logic.getRequestedTickRate());
 	}
 	
+	/**
+	 * Reset game state.
+	 */
 	public void resetGame(View action)
 	{		
 		this.pauseGame();
@@ -139,6 +157,9 @@ public class WhackADroidFragment extends Fragment implements GameContext, HighSc
 		this.score.setText(String.format(SCORE_FORMAT, this.game_logic.getCurrentScore()));
 	}
 
+	/**
+	 * Game over. Halt game, show loss message and update views
+	 */
 	@Override
 	public void game_ended() 
 	{
@@ -150,6 +171,9 @@ public class WhackADroidFragment extends Fragment implements GameContext, HighSc
 		this.pause_button.setVisibility(View.GONE);
 	}
 	
+	/**
+	 * Displays high score dialog in response to button press
+	 */
 	public void showScoreDialog(View actionView)
 	{
 		this.score_button.setEnabled(false);
@@ -157,6 +181,10 @@ public class WhackADroidFragment extends Fragment implements GameContext, HighSc
 		this.high_score_dialog.show(this.getChildFragmentManager(), "highScore");
 	}
 
+	
+	/**
+	 * Called by the game logic when the game loop has finished running. Used to re-schedule the next update to game logic
+	 */
 	@Override
 	public void tick_complete() 
 	{

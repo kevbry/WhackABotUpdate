@@ -58,6 +58,10 @@ public class WhackABotActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
     
+    /**
+     * The following are shims to push touch events to the fragment and game manager
+     * @param action
+     */
     public void resetGame(View action)
     {  
         this.provider.resetGame(action);

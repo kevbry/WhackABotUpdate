@@ -58,8 +58,10 @@ class WhackADroidLogic extends GameLogic
 	/***
 	 * Run game. Should be repeatedly called by the game scheduler at this.tick_rate ms
 	 */
+	@Override
 	public void runLogic() 
 	{
+	    //popped keeps track of whether a droid has been made angry in this iteration
 		boolean popped = false;
 		int attempts = 0;
 		
@@ -69,17 +71,16 @@ class WhackADroidLogic extends GameLogic
 		while(attempts++ < 8 && !popped)
 		{
 			int index =  (int)Math.floor(Math.random() * 16);
-			Droid droid = this.all_droids.get(index);
-			if(!droid.isAngry())
+			Droid randomDroid = this.all_droids.get(index);
+			if(randomDroid.becomeAngry())
 			{
 				popped = true;
-				droid.becomeAngry();
 				this.num_ticks++;
 			}
 		}
 		
 		int angry_count = 0;
-		
+		//Figure out how many angry droids are on screen
 		for (Droid current_droid : this.all_droids) 
 		{
 			if(current_droid.isAngry())
@@ -88,6 +89,7 @@ class WhackADroidLogic extends GameLogic
 			}
 		}
 		
+		//If there are too many angry droids, the game is over
 		if(angry_count > MAX_ANGRY_DROIDS)
 		{
 			this.context.game_ended();
@@ -98,6 +100,7 @@ class WhackADroidLogic extends GameLogic
 		}
 	}
 
+	//10 points per tick
 	public int getCurrentScore() 
 	{
 		return this.num_ticks*10;

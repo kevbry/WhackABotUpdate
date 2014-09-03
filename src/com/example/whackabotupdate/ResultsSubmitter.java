@@ -14,7 +14,11 @@ import org.apache.http.message.BasicNameValuePair;
 
 import android.os.AsyncTask;
 import android.util.Log;
-
+/**
+ * This class is currently broken due to changes in the Google docs api
+ * @author ins208
+ *
+ */
 public class ResultsSubmitter extends AsyncTask<Object, Void, Void>
 {
 	private static final String NAME_FIELD="entry.1536929076";
